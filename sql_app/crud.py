@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from . import models
 
-def get_gene(db: Session, gene_id: int):
-    return db.query(models.Gene).filter(models.Gene.id == gene_id).first()
 
+def get_admin(db:Session,admin_loginname:str):
+    return db.query(models.Admin).filter(models.Admin.admin_loginname == admin_loginname).first()
 
 def get_gene_by_name(db: Session, gene_name: str):
     return db.query(models.Gene).filter(models.Gene.gene == gene_name).first()
