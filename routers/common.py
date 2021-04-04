@@ -30,9 +30,34 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
     choose = request_data.choose
     account = request_data.account
     passwd = request_data.passwd
-    data = crud.get_admin(db,account).__dict__
-    data.pop('_sa_instance_state')
-    return json.dumps(data,separators=(',',':'))
+    message={"flag":False,"mess":None}
+    if choose == 'admin':
+        data = crud.get_admin(db, account)
+        flag = True
+    else:
+        data = crud.get_cust(db,account)
+        flag = False
+    if not bool(data):
+        message["flag"]="error"
+        message["mess"]="用户不存在"
+    else:
+        data = data.__dict__
+        data.pop('_sa_instance_state')
+        if flag:
+            if data["admin_password"] == passwd:
+                message["flag"] = "success"
+                message["mess"] = "admin"
+            else:
+                message["flag"] = "error"
+                message["mess"] = "密码错误"
+        else:
+            if data["cust_password"] == passwd:
+                message["flag"] = "success"
+                message["mess"] = "cust"
+            else:
+                message["flag"] = "error"
+                message["mess"] = "密码错误"
+    return message
 
 
 
