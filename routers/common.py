@@ -30,7 +30,7 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
     choose = request_data.choose
     account = request_data.account
     passwd = request_data.passwd
-    message={"flag":False,"mess":None}
+    message={"flag":False,"mess":None,"name":None}
     if choose == 'admin':
         data = crud.get_admin(db, account)
         flag = True
@@ -47,6 +47,7 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
             if data["admin_password"] == passwd:
                 message["flag"] = "success"
                 message["mess"] = "admin"
+                message["name"] = data["admin_realname"]
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"
@@ -54,6 +55,7 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
             if data["cust_password"] == passwd:
                 message["flag"] = "success"
                 message["mess"] = "cust"
+                message["name"] = data["cust_realname"]
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"

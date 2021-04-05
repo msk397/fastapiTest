@@ -21,9 +21,7 @@ class Charge(Base):
     __tablename__ = 'charge'
 
     charge_id = Column(String(40), primary_key=True)
-    cust_name = Column(String(50), nullable=False)
-    cust_addr = Column(String(255), nullable=False)
-    cust_phone = Column(String(40), nullable=False)
+    cust_id = Column(String(40), nullable=False)
     charge_status = Column(String(10), nullable=False, comment='????')
     charge_time = Column(DateTime)
     charge_cost = Column(Float(10, True), nullable=False)
@@ -46,12 +44,10 @@ class Fix(Base):
     __tablename__ = 'fix'
 
     fix_id = Column(String(50), primary_key=True)
-    fix_name = Column(String(50), nullable=False)
-    fix_addr = Column(String(100), nullable=False)
-    fix_phone = Column(String(20), nullable=False)
     fix_log = Column(String(500), nullable=False)
     fix_status = Column(String(10), nullable=False)
     fix_time = Column(DateTime, nullable=False, comment='?????')
+    cust_id = Column(String(40), nullable=False)
 
 
 class Poster(Base):
