@@ -1,8 +1,5 @@
-import json
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import List
 from sqlalchemy.orm import Session
 
 from sql_app import crud
