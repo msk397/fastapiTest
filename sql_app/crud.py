@@ -1,10 +1,19 @@
 from sqlalchemy.orm import Session
 from . import models
 
-
-def get_admin(db:Session,admin_loginname:str):
+#user
+def get_admin(db:Session, admin_loginname:str):
     return db.query(models.Admin).filter(models.Admin.admin_loginname == admin_loginname).first()
 
+def save_admin(db:Session,login:str,real:str,addr:str,phone:str):
+    db.query(models.Admin).filter(models.Admin.admin_loginname == login).update({
+        'admin_realname': real,
+        'admin_phone': phone,
+        'admin_addr': addr,
+    })
+    db.commit()
+
+#cust
 def get_cust(db:Session,cust_loginname:str):
     return db.query(models.Cust).filter(models.Cust.cust_loginname == cust_loginname).first()
 

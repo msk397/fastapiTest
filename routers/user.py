@@ -13,6 +13,12 @@ router = APIRouter(
 class QueryUser(BaseModel):
     name: str = None
 
+class User(BaseModel):
+    login: str = None
+    real: str = None
+    addr: str = None
+    phone: str = None
+
 def get_db():
     db = ''
     try:
@@ -24,15 +30,24 @@ def get_db():
 
 @router.post("/queryusermess")
 async def queryusermess(request_data: QueryUser,db: Session = Depends(get_db)):
-    print(request_data)
     account = request_data.name
-    message = {"real": None, "addr": None, "phone": None, "passwd":None}
+    message = {"real": None, "addr": None, "phone": None, "passwd": None}
     data = crud.get_admin(db, account).__dict__
     data.pop('_sa_instance_state')
     message["real"]=data["admin_realname"]
     message["addr"] = data["admin_addr"]
     message["phone"] = data["admin_phone"]
     message["passwd"] = data["admin_password"]
+    return message
+
+@router.post("/saveusermess")
+async def saveusermess(request_data: User,db: Session = Depends(get_db)):
+    login = request_data.login
+    real = request_data.real
+    phone = request_data.phone
+    addr = request_data.addr
+    message = {"mess": "修改成功"}
+    crud.save_admin(db, login, real, addr, phone)
     return message
 
 @router.get("/me", tags=["users"])
