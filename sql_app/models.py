@@ -1,6 +1,7 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, Float, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import backref, relationship
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -21,24 +22,23 @@ class Charge(Base):
     __tablename__ = 'charge'
 
     charge_id = Column(String(40), primary_key=True)
-    cust_id = Column(String(40), nullable=False)
+    cust_id = Column(String(40), nullable=False, index=True)
     charge_status = Column(String(10), nullable=False, comment='????')
     charge_time = Column(DateTime)
     charge_cost = Column(Float(10, True), nullable=False)
     charge_ddl = Column(DateTime, nullable=False, comment='??????')
     charge_memo = Column(String(30), nullable=False, comment='????')
+    name = relationship('Cust')
 
-
-class Cust(Base):
+class Cust(Charge):
     __tablename__ = 'cust'
 
-    cust_id = Column(String(40), primary_key=True)
+    cust_id = Column(ForeignKey('charge.cust_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
     cust_loginname = Column(String(40), nullable=False)
     cust_password = Column(String(50), nullable=False)
     cust_name = Column(String(50), nullable=False)
     cust_addr = Column(String(50), nullable=False)
     cust_phone = Column(String(20), nullable=False)
-
 
 class Fix(Base):
     __tablename__ = 'fix'

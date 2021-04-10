@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from sqlalchemy.orm import Session
 
-from sql_app import crud
+from sql_app.crud import crudCommon
 from sql_app.database import SessionLocal
 
 router = APIRouter(
@@ -36,7 +36,7 @@ def get_db():
 async def queryusermess(request_data: QueryUser,db: Session = Depends(get_db)):
     account = request_data.name
     message = {"real": None, "addr": None, "phone": None, "passwd": None}
-    data = crud.get_admin(db, account).__dict__
+    data = crudCommon.get_admin(db, account).__dict__
     data.pop('_sa_instance_state')
     message["real"]=data["admin_realname"]
     message["addr"] = data["admin_addr"]
@@ -51,21 +51,12 @@ async def save_user_mess(request_data: User,db: Session = Depends(get_db)):
     phone = request_data.phone
     addr = request_data.addr
     message = {"mess": "修改成功"}
-    crud.save_admin(db, login, real, addr, phone)
+    crudCommon.save_admin(db, login, real, addr, phone)
     return message
 
 @router.post("/changeuserpass")
 async def change_user_pass(request_data: ChangePass,db: Session = Depends(get_db)):
     login = request_data.login
     newPass = request_data.newPass
-    crud.change_user_pass(db, login, newPass)
+    crudCommon.change_user_pass(db, login, newPass)
     return {"mess": "修改成功"}
-
-@router.get("/me", tags=["users"])
-async def read_user_me():
-    return {"username": "fakecurrentuser"}
-
-
-@router.get("/{username}", tags=["users"])
-async def read_user(username: str):
-    return {"username": username}

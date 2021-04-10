@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models
+from sql_app import models
 
 #user
 def get_admin(db:Session, admin_loginname:str):
