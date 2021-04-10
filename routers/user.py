@@ -19,6 +19,10 @@ class User(BaseModel):
     addr: str = None
     phone: str = None
 
+class ChangePass(BaseModel):
+    login: str = None
+    newPass: str = None
+
 def get_db():
     db = ''
     try:
@@ -41,7 +45,7 @@ async def queryusermess(request_data: QueryUser,db: Session = Depends(get_db)):
     return message
 
 @router.post("/saveusermess")
-async def saveusermess(request_data: User,db: Session = Depends(get_db)):
+async def save_user_mess(request_data: User,db: Session = Depends(get_db)):
     login = request_data.login
     real = request_data.real
     phone = request_data.phone
@@ -49,6 +53,13 @@ async def saveusermess(request_data: User,db: Session = Depends(get_db)):
     message = {"mess": "修改成功"}
     crud.save_admin(db, login, real, addr, phone)
     return message
+
+@router.post("/changeuserpass")
+async def change_user_pass(request_data: ChangePass,db: Session = Depends(get_db)):
+    login = request_data.login
+    newPass = request_data.newPass
+    crud.change_user_pass(db, login, newPass)
+    return {"mess": "修改成功"}
 
 @router.get("/me", tags=["users"])
 async def read_user_me():

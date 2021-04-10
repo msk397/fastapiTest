@@ -30,3 +30,10 @@ def delete_gene(db: Session, gene_id: int):
     db.query(models.Gene).filter(models.Gene.id == gene_id).delete()
     db.commit()
     return {'Result': '删除成功'}
+
+
+def change_user_pass(db, login, newPass):
+    db.query(models.Admin).filter(models.Admin.admin_loginname == login).update({
+        'admin_password': newPass,
+    })
+    db.commit()
