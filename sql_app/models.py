@@ -1,7 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Column, DateTime, Float, ForeignKey, String
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, String
+from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -18,27 +19,16 @@ class Admin(Base):
     admin_addr = Column(String(100))
 
 
-class Charge(Base):
-    __tablename__ = 'charge'
-
-    charge_id = Column(String(40), primary_key=True)
-    cust_id = Column(String(40), nullable=False, index=True)
-    charge_status = Column(String(10), nullable=False, comment='????')
-    charge_time = Column(DateTime)
-    charge_cost = Column(Float(10, True), nullable=False)
-    charge_ddl = Column(DateTime, nullable=False, comment='??????')
-    charge_memo = Column(String(30), nullable=False, comment='????')
-    name = relationship('Cust')
-
-class Cust(Charge):
+class Cust(Base):
     __tablename__ = 'cust'
 
-    cust_id = Column(ForeignKey('charge.cust_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True)
+    cust_id = Column(String(40), primary_key=True)
     cust_loginname = Column(String(40), nullable=False)
     cust_password = Column(String(50), nullable=False)
     cust_name = Column(String(50), nullable=False)
     cust_addr = Column(String(50), nullable=False)
     cust_phone = Column(String(20), nullable=False)
+
 
 class Fix(Base):
     __tablename__ = 'fix'
@@ -63,3 +53,17 @@ class Test(Base):
     __tablename__ = 'test'
 
     test = Column(String(255), primary_key=True)
+
+
+class Charge(Base):
+    __tablename__ = 'charge'
+
+    charge_id = Column(String(40), primary_key=True)
+    cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    charge_status = Column(TINYINT(1), nullable=False, comment='????')
+    charge_time = Column(Date)
+    charge_cost = Column(Float(10, True), nullable=False)
+    charge_ddl = Column(Date, nullable=False, comment='??????')
+    charge_memo = Column(String(30), nullable=False, comment='????')
+
+    cust = relationship('Cust')
