@@ -1,8 +1,9 @@
+import time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-from sql_app.crud import crudUser
+import  uuid
+from sql_app.crud import crudUser,crudCommon
 from sql_app.database import SessionLocal
 
 router = APIRouter(
@@ -54,9 +55,7 @@ async def quer_Cust_Name(db: Session = Depends(get_db)):
     for i in data:
         i = i.__dict__
         i.pop('_sa_instance_state')
-        print(i)
         message.append(i['cust_name'])
-    print(message)
     return message
 
 
@@ -67,10 +66,6 @@ async def change_charge(request_data: Charge,db: Session = Depends(get_db)):
     charge_ddl =request_data. charge_ddl
     charge_id =request_data. charge_id
     charge_memo =request_data. charge_memo
-    charge_status =request_data. charge_status
-    charge_time =request_data. charge_time
-    cust_id =request_data.cust_id
-    cust_name =request_data.cust_name
     status =request_data.status
     if status:
         charge_status = 1
@@ -78,3 +73,21 @@ async def change_charge(request_data: Charge,db: Session = Depends(get_db)):
         charge_status = 0
     crudUser.change_Charge(db, charge_id,charge_memo,charge_ddl,charge_cost,charge_status)
     return {"mess": "修改成功"}
+
+@router.post("/AddCharge")
+async def Add_charge(request_data: Charge,db: Session = Depends(get_db)):
+    charge_cost =request_data.charge_cost
+    charge_ddl =request_data. charge_ddl
+    charge_memo =request_data. charge_memo
+    status =request_data.status
+    cust_name = request_data.cust_name
+    charge_time = time.strftime("%Y-%m-%d", time.localtime())
+    charge_id = uuid.uuid3(uuid.NAMESPACE_DNS, cust_name)
+    if status:
+        charge_status = 1
+    else:
+        charge_status = 0
+    data = crudCommon.get_cust(db,cust_name)
+    print(data)
+    #crudUser.add_Charge(db, charge_id,charge_memo,charge_ddl,charge_cost,charge_status,charge_time,cust_id)
+    return {"mess": "添加成功"}

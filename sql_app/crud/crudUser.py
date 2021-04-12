@@ -17,3 +17,10 @@ def change_Charge(db, charge_id, charge_memo, charge_ddl, charge_cost, charge_st
         'charge_status':charge_status
     })
     db.commit()
+
+
+def add_Charge(db, id, memo, dl, cost, status, time, cu_id):
+    charge = models.Charge(charge_id = id,charge_memo = memo,
+                           charge_ddl=dl,charge_status=status,charge_cost = cost,
+                           charge_time=time,cust_id = cu_id)
+    db.add(charge)

@@ -16,6 +16,8 @@ def save_admin(db:Session,login:str,real:str,addr:str,phone:str):
 #cust
 def get_cust(db:Session,cust_loginname:str):
     return db.query(models.Cust).filter(models.Cust.cust_loginname == cust_loginname).first()
+def get_custid(db:Session,cust_name:str):
+    return db.query(models.Cust).filter(models.Cust.cust_name == cust_name).first()
 
 def get_gene_by_name(db: Session, gene_name: str):
     return db.query(models.Gene).filter(models.Gene.gene == gene_name).first()
