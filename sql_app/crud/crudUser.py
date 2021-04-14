@@ -24,3 +24,9 @@ def add_Charge(db, id, memo, dl, cost, status, time, cu_id):
                            charge_ddl=dl,charge_status=status,charge_cost = cost,
                            charge_time=time,cust_id = cu_id)
     db.add(charge)
+    db.commit()
+
+def del_chargeone(db: Session, id: str):
+    db.query(models.Charge).filter(models.Charge.charge_id== id).delete()
+    db.commit()
+
