@@ -40,15 +40,6 @@ class Fix(Base):
     cust_id = Column(String(40), nullable=False)
 
 
-class Poster(Base):
-    __tablename__ = 'poster'
-
-    poster_id = Column(String(255), primary_key=True)
-    poster_log = Column(String(500), nullable=False)
-    poster_time = Column(DateTime, nullable=False)
-    poster_people = Column(String(255), nullable=False, comment='????')
-
-
 class Test(Base):
     __tablename__ = 'test'
 
@@ -67,3 +58,14 @@ class Charge(Base):
     charge_memo = Column(String(30), nullable=False, comment='????')
 
     cust = relationship('Cust')
+
+
+class Poster(Base):
+    __tablename__ = 'poster'
+
+    poster_id = Column(String(255), primary_key=True)
+    poster_title = Column(String(255), nullable=False)
+    poster_log = Column(String(5000), nullable=False)
+    poster_time = Column(DateTime, nullable=False)
+    admin_id = Column(ForeignKey('admin.admin_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, comment='????')
+    admin = relationship('Admin')

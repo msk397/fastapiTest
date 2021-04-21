@@ -30,3 +30,19 @@ def del_chargeone(db: Session, id: str):
     db.query(models.Charge).filter(models.Charge.charge_id== id).delete()
     db.commit()
 
+
+def change_Poster(db, poster_id, poster_log, poster_title, poster_time):
+    db.query(models.Poster).filter(models.Poster.poster_id == poster_id).update({
+        'poster_log': poster_log,
+        'poster_title': poster_title,
+        'poster_time':  poster_time,
+    })
+    db.commit()
+
+
+def add_Poster(db, id, log, title, time,ad_id):
+    poster = models.Poster(poster_id=id, poster_log = log,
+                           poster_title = title,poster_time = time,
+                           admin_id = ad_id)
+    db.add(poster)
+    db.commit()

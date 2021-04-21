@@ -39,3 +39,12 @@ def change_user_pass(db, login, newPass):
         'admin_password': newPass,
     })
     db.commit()
+
+
+def get_poster(db):
+    return db.query(models.Poster, models.Admin.admin_realname) \
+        .join(models.Admin, models.Poster.admin_id == models.Admin.admin_id).all()
+
+
+def get_adminid(db, admin_name):
+    return db.query(models.Admin.admin_id).filter(models.Admin.admin_realname == admin_name).first()
