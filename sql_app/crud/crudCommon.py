@@ -48,3 +48,7 @@ def get_poster(db):
 
 def get_adminid(db, admin_name):
     return db.query(models.Admin.admin_id).filter(models.Admin.admin_realname == admin_name).first()
+
+
+def get_userid(db, login):
+    return db.query(models.Admin.admin_id).filter(models.Admin.admin_loginname == login).first()

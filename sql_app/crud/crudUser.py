@@ -46,3 +46,30 @@ def add_Poster(db, id, log, title, time,ad_id):
                            admin_id = ad_id)
     db.add(poster)
     db.commit()
+
+
+def del_posterone(db, id):
+    db.query(models.Poster).filter(models.Poster.poster_id == id).delete()
+    db.commit()
+
+def get_fix(db:Session):
+    return db.query(models.Fix,models.Cust.cust_name,models.Admin.admin_realname,models.Admin.admin_loginname)\
+        .join( models.Cust, models.Fix.cust_id==models.Cust.cust_id ) \
+        .join(models.Admin, models.Fix.admin_id == models.Admin.admin_id) \
+        .all()
+
+
+def del_fixone(db, id):
+    db.query(models.Fix).filter(models.Fix.fix_id == id).delete()
+    db.commit()
+
+
+def change_fix(db, id, end, start, log, admin_id, fix_status):
+    db.query(models.Fix).filter(models.Fix.fix_id == id).update({
+        'fix_log':log,
+        'fix_status':fix_status,
+        'fix_startime':start,
+        'fix_endtime':end,
+        'admin_id':admin_id,
+    })
+    db.commit()

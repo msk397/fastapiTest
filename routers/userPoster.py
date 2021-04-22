@@ -32,6 +32,8 @@ class AddPoster(BaseModel):
     admin_name: str = None
     poster_date: str = None
 
+class DelPoster(BaseModel):
+    poster_id: str = None
 def get_db():
     db = ''
     try:
@@ -48,6 +50,7 @@ async def query_poster(db: Session = Depends(get_db)):
         mid = i[0].__dict__
         mid.pop('_sa_instance_state')
         mid['admin_name']=i[1]
+        mid.pop('admin_id')
         time  = datetime.datetime.now().replace(microsecond=0) - mid['poster_time']
         time =time.days * 86400 + time.seconds
         mid['poster_date'] = mid['poster_time'].strftime('%Y-%m-%d')
@@ -85,3 +88,11 @@ async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     admin_id = crudCommon.get_adminid(db, admin_name)
     crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0])
     return {"mess": "添加成功"}
+
+
+
+
+
+@router.post("/DelPoster")
+async def Del_Poster(request_data: DelPoster,db: Session = Depends(get_db)):
+    crudUser.del_posterone(db, request_data.poster_id)

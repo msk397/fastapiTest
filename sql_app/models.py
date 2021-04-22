@@ -11,8 +11,8 @@ metadata = Base.metadata
 class Admin(Base):
     __tablename__ = 'admin'
 
-    admin_id = Column(String(40), primary_key=True)
-    admin_loginname = Column(String(20), nullable=False)
+    admin_id = Column(String(40), primary_key=True, nullable=False, index=True)
+    admin_loginname = Column(String(20), primary_key=True, nullable=False)
     admin_realname = Column(String(50), nullable=False)
     admin_password = Column(String(40), nullable=False)
     admin_phone = Column(String(20), nullable=False)
@@ -30,22 +30,6 @@ class Cust(Base):
     cust_phone = Column(String(20), nullable=False)
 
 
-class Fix(Base):
-    __tablename__ = 'fix'
-
-    fix_id = Column(String(50), primary_key=True)
-    fix_log = Column(String(500), nullable=False)
-    fix_status = Column(String(10), nullable=False)
-    fix_time = Column(DateTime, nullable=False, comment='?????')
-    cust_id = Column(String(40), nullable=False)
-
-
-class Test(Base):
-    __tablename__ = 'test'
-
-    test = Column(String(255), primary_key=True)
-
-
 class Charge(Base):
     __tablename__ = 'charge'
 
@@ -60,6 +44,20 @@ class Charge(Base):
     cust = relationship('Cust')
 
 
+class Fix(Base):
+    __tablename__ = 'fix'
+
+    fix_id = Column(String(50), primary_key=True)
+    fix_log = Column(String(500), nullable=False)
+    fix_status = Column(TINYINT(1), nullable=False)
+    fix_startime = Column(DateTime, nullable=False, comment='?????')
+    cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    fix_endtime = Column(DateTime)
+    admin_id = Column(ForeignKey('admin.admin_id', onupdate='CASCADE'), index=True)
+    admin = relationship('Admin')
+    cust = relationship('Cust')
+
+
 class Poster(Base):
     __tablename__ = 'poster'
 
@@ -68,4 +66,5 @@ class Poster(Base):
     poster_log = Column(String(5000), nullable=False)
     poster_time = Column(DateTime, nullable=False)
     admin_id = Column(ForeignKey('admin.admin_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, comment='????')
+
     admin = relationship('Admin')
