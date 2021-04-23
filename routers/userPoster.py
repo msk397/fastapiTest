@@ -1,10 +1,8 @@
 import datetime
-import time
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import List
 from sqlalchemy.orm import Session
 
 from sql_app.crud import crudCommon, crudUser
@@ -88,10 +86,6 @@ async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     admin_id = crudCommon.get_adminid(db, admin_name)
     crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0])
     return {"mess": "添加成功"}
-
-
-
-
 
 @router.post("/DelPoster")
 async def Del_Poster(request_data: DelPoster,db: Session = Depends(get_db)):

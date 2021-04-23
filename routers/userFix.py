@@ -1,10 +1,5 @@
-import datetime
-import time
-import uuid
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import List
 from sqlalchemy.orm import Session
 
 from sql_app.crud import crudCommon, crudUser

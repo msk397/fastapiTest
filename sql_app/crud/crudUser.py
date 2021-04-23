@@ -73,3 +73,35 @@ def change_fix(db, id, end, start, log, admin_id, fix_status):
         'admin_id':admin_id,
     })
     db.commit()
+
+def get_custmess(db):
+    return db.query(models.Cust).all()
+
+
+def resetCustPass(db, id, md5Pass):
+    db.query(models.Cust).filter(models.Cust.cust_id == id).update({
+        'cust_password':md5Pass,
+    })
+    db.commit()
+
+
+def change_Cust(db, id, addr, name, phone):
+    db.query(models.Cust).filter(models.Cust.cust_id == id).update({
+        'cust_addr':addr,
+        'cust_name':name,
+        'cust_phone':phone,
+    })
+    db.commit()
+
+
+def add_Cust(db, id, addr, name, phone, loginname, param):
+    cust = models.Cust(cust_id=id, cust_loginname=loginname,
+                       cust_addr=addr,cust_name=name,
+                       cust_phone=phone,cust_password=param)
+    db.add(cust)
+    db.commit()
+
+
+def del_Custone(db, id):
+    db.query(models.Cust).filter(models.Cust.cust_id == id).delete()
+    db.commit()
