@@ -22,8 +22,8 @@ class Admin(Base):
 class Cust(Base):
     __tablename__ = 'cust'
 
-    cust_id = Column(String(40), primary_key=True)
-    cust_loginname = Column(String(40), nullable=False)
+    cust_id = Column(String(40), primary_key=True, nullable=False)
+    cust_loginname = Column(String(40), primary_key=True, nullable=False)
     cust_password = Column(String(50), nullable=False)
     cust_name = Column(String(50), nullable=False)
     cust_addr = Column(String(50), nullable=False)
@@ -54,6 +54,7 @@ class Fix(Base):
     cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     fix_endtime = Column(DateTime)
     admin_id = Column(ForeignKey('admin.admin_id', onupdate='CASCADE'), index=True)
+
     admin = relationship('Admin')
     cust = relationship('Cust')
 

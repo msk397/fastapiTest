@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import  uuid
+
+import Util
 from sql_app.crud import crudUser,crudCommon,crudCust
 from sql_app.database import SessionLocal
 
@@ -48,6 +50,7 @@ async def quer_user_charge(db: Session = Depends(get_db)):
         mid = i[0].__dict__
         mid.pop('_sa_instance_state')
         mid['cust_name']=i[1]
+        mid['cust_addr'] = Util.addr(i[2])
         if mid['charge_status']==0:
             mid['charge_status']="未缴费"
             mid['status']=False
@@ -91,7 +94,7 @@ async def Add_charge(request_data: AddCharge,db: Session = Depends(get_db)):
     status =request_data.status
     cust_name = request_data.cust_name
     charge_time = time.strftime("%Y-%m-%d", time.localtime())
-    charge_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, cust_name))
+    charge_id = str(uuid.uuid4())
     if status:
         charge_status = 1
     else:

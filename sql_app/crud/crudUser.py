@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sql_app import models
 def get_charge(db:Session):
-    return db.query(models.Charge,models.Cust.cust_name)\
+    return db.query(models.Charge,models.Cust.cust_name,models.Cust.cust_addr)\
         .join( models.Cust, models.Charge.cust_id==models.Cust.cust_id ).all()
 
 def get_Cust(db:Session):
@@ -53,7 +53,7 @@ def del_posterone(db, id):
     db.commit()
 
 def get_fix(db:Session):
-    return db.query(models.Fix,models.Cust.cust_name,models.Admin.admin_realname,models.Admin.admin_loginname)\
+    return db.query(models.Fix,models.Cust.cust_name,models.Admin.admin_realname,models.Admin.admin_loginname,models.Cust.cust_addr)\
         .join( models.Cust, models.Fix.cust_id==models.Cust.cust_id ) \
         .join(models.Admin, models.Fix.admin_id == models.Admin.admin_id) \
         .all()

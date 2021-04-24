@@ -18,3 +18,11 @@ def setPass(id,name):
     name = name
     passwd =id+FirstPinyin(name)
     return [passwd,MD5(passwd)]
+
+#处理业主地址
+def addr(str):
+    addrlist = str.split('-', 2)
+    a = addrlist[0]
+    b= addrlist[1]
+    c= addrlist[2]
+    return a + '号楼' + b + '单元' + c

@@ -82,7 +82,7 @@ async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     poster_date = request_data.poster_date
     poster_time = poster_date + ' ' + poster_time + ':00'
     poster_time = datetime.datetime.strptime(poster_time, '%Y-%m-%d %H:%M:%S')
-    poster_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, poster_title))
+    poster_id = str(uuid.uuid4())
     admin_id = crudCommon.get_adminid(db, admin_name)
     crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0])
     return {"mess": "添加成功"}

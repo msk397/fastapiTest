@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+import Util
 from sql_app.crud import crudCommon, crudUser
 from sql_app.database import SessionLocal
 
@@ -24,6 +25,7 @@ async def query_UserFix(db: Session = Depends(get_db)):
         mid = i[0].__dict__
         mid.pop('_sa_instance_state')
         mid['cust_name'] = i[1]
+        mid['cust_addr'] = Util.addr(i[4])
         if mid['admin_id'] == 'null':
             mid['admin_name'] = ''
             mid['admin_login'] = ''
@@ -69,6 +71,9 @@ async def change_fix(request_data: changeFix,db: Session = Depends(get_db)):
     login = request_data.admin_login
     name = request_data.cust_name
     status =request_data.status
+    if end =='':
+        end = start
+        login = 'null'
     admin_id = crudCommon.get_userid(db, login)
     if status:
         fix_status = 1

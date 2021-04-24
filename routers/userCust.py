@@ -44,7 +44,7 @@ async def resetPass(request_data: resetPass,db: Session = Depends(get_db)):
     passwd =id+Util.FirstPinyin(name)
     md5Pass = Util.MD5(passwd)
     crudUser.resetCustPass(db,request_data.id,md5Pass)
-    return passwd
+    return "已将密码重置为："+passwd
 
 
 class CustMess(BaseModel):
@@ -76,11 +76,14 @@ class AddCust(BaseModel):
 
 @router.post("/AddCust")
 async def AddCust(data:AddCust,db:Session = Depends(get_db)):
+    getdata = crudCommon.get_custlogin(db,data.cust_loginname)
+    if getdata !=None:
+        return "用户名重复请重新设置"
     addr =  data.cust_floor+'-'+data.cust_unit+'-'+data.cust_door
-    id = str(uuid.uuid3(uuid.NAMESPACE_DNS, data.cust_loginname))
+    id = str(uuid.uuid4())
     passwd = Util.setPass(id,data.cust_name)
     crudUser.add_Cust(db, id,addr,data.cust_name,data.cust_phone,data.cust_loginname,passwd[1])
-    return passwd[0]
+    return "密码为："+passwd[0]
 
 
 class Delcust(BaseModel):

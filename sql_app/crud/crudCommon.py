@@ -52,3 +52,6 @@ def get_adminid(db, admin_name):
 
 def get_userid(db, login):
     return db.query(models.Admin.admin_id).filter(models.Admin.admin_loginname == login).first()
+
+def get_custlogin(db, login):
+    return db.query(models.Cust.cust_loginname).filter(models.Cust.cust_loginname == login).first()
