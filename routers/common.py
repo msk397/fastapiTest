@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+import Util
 from sql_app.crud import crudCommon
 from sql_app.database import SessionLocal
 router = APIRouter(
@@ -26,7 +27,7 @@ class Item(BaseModel):
 async def signin(request_data: Item,db: Session = Depends(get_db)):
     choose = request_data.choose
     account = request_data.account
-    passwd = request_data.passwd
+    passwd = Util.MD5(request_data.passwd)
     message={"flag":False,"mess":None,"name":None}
     if choose == 'admin':
         data = crudCommon.get_admin(db, account)

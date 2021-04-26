@@ -26,10 +26,12 @@ async def query_UserFix(db: Session = Depends(get_db)):
         mid.pop('_sa_instance_state')
         mid['cust_name'] = i[1]
         mid['cust_addr'] = Util.addr(i[4])
+        #未处理
         if mid['admin_id'] == 'null':
             mid['admin_name'] = ''
             mid['admin_login'] = ''
             mid['fix_endtime'] = ''
+        #已处理
         else:
             mid['admin_name'] = i[2]
             mid['admin_login'] = i[3]
