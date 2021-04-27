@@ -22,13 +22,17 @@ class Poster(BaseModel):
     admin_name: str = None
     poster_date: str = None
     status: str = None
+    poster_enddate: str = None
+    poster_endtime: str = None
 
 class AddPoster(BaseModel):
     poster_log: str = None
-    poster_time: str = None
     poster_title: str = None
     admin_name: str = None
     poster_date: str = None
+    poster_time: str = None
+    poster_enddate: str = None
+    poster_endtime: str = None
 
 class DelPoster(BaseModel):
     poster_id: str = None
@@ -51,12 +55,21 @@ async def query_poster(db: Session = Depends(get_db)):
         mid.pop('admin_id')
         time  = datetime.datetime.now().replace(microsecond=0) - mid['poster_time']
         time =time.days * 86400 + time.seconds
-        mid['poster_date'] = mid['poster_time'].strftime('%Y-%m-%d')
-        mid['poster_time'] = mid['poster_time'].strftime('%H:%M')
         if time >= 0:
-            mid['status']="已发布"
+            endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
+            endtime = endtime.days * 86400 + endtime.seconds
+            if endtime>=0:
+                mid['status']="已过期"
+            else:
+                mid['status'] = "已发布"
         else:
             mid['status'] = "未发布"
+        mid['poster_date'] = mid['poster_time'].strftime('%Y-%m-%d')
+        mid['poster_time'] = mid['poster_time'].strftime('%H:%M')
+        mid['poster_enddate'] = mid['poster_endtime'].strftime('%Y-%m-%d')
+        mid['poster_endtime'] = mid['poster_endtime'].strftime('%H:%M')
+        mid['time'] = mid['poster_date']+" "+mid['poster_time']
+        mid['endtime'] = mid['poster_enddate'] + " " + mid['poster_endtime']
         message.append(mid)
     return message
 
@@ -69,23 +82,42 @@ async def change_poster(request_data: Poster,db: Session = Depends(get_db)):
     poster_date = request_data.poster_date
     poster_time = poster_date +' '+poster_time+':00'
     poster_time= datetime.datetime.strptime(poster_time, '%Y-%m-%d %H:%M:%S')
-    crudUser.change_Poster(db, poster_id,poster_log, poster_title, poster_time)
-    return {"mess": "修改成功"}
+    poster_enddate = request_data.poster_enddate
+    poster_endtime = request_data.poster_endtime
+    poster_endtime = poster_enddate + ' ' + poster_endtime + ':00'
+    poster_endtime = datetime.datetime.strptime(poster_endtime, '%Y-%m-%d %H:%M:%S')
+    time = poster_endtime-poster_time
+    time = time.days * 86400 + time.seconds
+    if time>0:
+        crudUser.change_Poster(db, poster_id, poster_log, poster_title, poster_time, poster_endtime)
+        return {"mess": "修改成功"}
+    else:
+        return {"mess": "截止时间需大于发布时间"}
+
 
 
 @router.post("/AddPoster")
 async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     poster_log=request_data.poster_log
     admin_name = request_data.admin_name
-    poster_time=request_data.poster_time
     poster_title=request_data.poster_title
     poster_date = request_data.poster_date
+    poster_time = request_data.poster_time
     poster_time = poster_date + ' ' + poster_time + ':00'
     poster_time = datetime.datetime.strptime(poster_time, '%Y-%m-%d %H:%M:%S')
+    poster_enddate = request_data.poster_enddate
+    poster_endtime = request_data.poster_endtime
+    poster_endtime = poster_enddate + ' ' + poster_endtime + ':00'
+    poster_endtime = datetime.datetime.strptime(poster_endtime, '%Y-%m-%d %H:%M:%S')
     poster_id = str(uuid.uuid4())
     admin_id = crudCommon.get_adminid(db, admin_name)
-    crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0])
-    return {"mess": "添加成功"}
+    time = poster_endtime-poster_time
+    time = time.days * 86400 + time.seconds
+    if time>0:
+        crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0],poster_endtime)
+        return {"mess": "添加成功"}
+    else:
+        return {"mess": "截止时间需大于发布时间"}
 
 @router.post("/DelPoster")
 async def Del_Poster(request_data: DelPoster,db: Session = Depends(get_db)):

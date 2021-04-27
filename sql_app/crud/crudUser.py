@@ -31,19 +31,20 @@ def del_chargeone(db: Session, id: str):
     db.commit()
 
 
-def change_Poster(db, poster_id, poster_log, poster_title, poster_time):
+def change_Poster(db, poster_id, poster_log, poster_title, poster_time,endtime):
     db.query(models.Poster).filter(models.Poster.poster_id == poster_id).update({
         'poster_log': poster_log,
         'poster_title': poster_title,
         'poster_time':  poster_time,
+        'poster_endtime':endtime,
     })
     db.commit()
 
 
-def add_Poster(db, id, log, title, time,ad_id):
+def add_Poster(db, id, log, title, time,ad_id,endtime):
     poster = models.Poster(poster_id=id, poster_log = log,
                            poster_title = title,poster_time = time,
-                           admin_id = ad_id)
+                           admin_id = ad_id,poster_endtime = endtime)
     db.add(poster)
     db.commit()
 
@@ -104,4 +105,11 @@ def add_Cust(db, id, addr, name, phone, loginname, param):
 
 def del_Custone(db, id):
     db.query(models.Cust).filter(models.Cust.cust_id == id).delete()
+    db.commit()
+
+
+def change_Posterpost(db, poster_id, time):
+    db.query(models.Poster).filter(models.Poster.poster_id == poster_id).update({
+        'poster_time': time,
+    })
     db.commit()

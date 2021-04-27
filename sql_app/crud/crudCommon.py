@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from sql_app import models
-from sqlalchemy import func
 
 #user
 def get_admin(db:Session, admin_loginname:str):
@@ -43,19 +42,24 @@ def get_poster(db):
     return db.query(models.Poster, models.Admin.admin_realname) \
         .join(models.Admin, models.Poster.admin_id == models.Admin.admin_id).all()
 
+def get_postercount(db):
+    return db.query(models.Poster).all()
+
 
 def getCustNum(db):
     return db.query(models.Cust).count()
 
 
 def getmoneyfail(db, time):
-    return db.query(func.sum(models.Charge.charge_cost)).filter(models.Charge.charge_time==time)\
-        .filter(models.Charge.charge_status==0).scalar()
+    # return db.query(func.sum(models.Charge.charge_cost)).filter(models.Charge.charge_time==time)\
+    #     .filter(models.Charge.charge_status==0).scalar()
+    return db.query(models.Charge).filter(models.Charge.charge_status == 0).count()
 
 
 def getmoneysucc(db, time):
-    return db.query(func.sum(models.Charge.charge_cost)).filter(models.Charge.charge_time == time) \
-        .filter(models.Charge.charge_status == 1).scalar()
+    return db.query(models.Charge).filter(models.Charge.charge_status == 1).count()
+    # return db.query(func.sum(models.Charge.charge_cost)).filter(models.Charge.charge_time == time) \
+    #     .filter(models.Charge.charge_status == 1).scalar()
 
 
 def getfixsucc(db):
@@ -78,3 +82,18 @@ def gettodayfix(db):
         .join(models.Cust, models.Fix.cust_id == models.Cust.cust_id) \
         .filter(models.Fix.fix_status == 0) \
         .order_by(models.Fix.fix_startime).all()
+
+
+def getlog(db, id):
+    return db.query(models.Log.log_id).filter(models.Log.log_id==id).first()
+
+
+def addlog(db, id, title, log, cust_id, time, status):
+    charge = models.Log(log_id = id,log_title = title,
+                        log_log = log,cust_id = cust_id,
+                        log_time = time,log_status=status
+                        )
+    db.add(charge)
+    db.commit()
+
+

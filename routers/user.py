@@ -1,12 +1,12 @@
 import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import List
+
 from sqlalchemy.orm import Session
 
 import Util
-from sql_app.crud import crudCommon
+from sql_app.crud import crudCommon, crudUser
 from sql_app.database import SessionLocal
 
 router = APIRouter(
@@ -89,8 +89,8 @@ async def todaymoney(db:Session = Depends(get_db)):
     data1 = crudCommon.getmoneysucc(db,time)
     sum = data0+data1
     succ = '%.2f' %(data0/sum*100)+'%'
-    sum = '%.2f' % sum
-    str = '%.2f' %data1+'/'+sum
+    sum = '%.0f' % sum
+    str = '%.0f' %data1+'/'+sum
     return {'succ':succ,'fail':str}
 
 @router.get("/fix")
@@ -126,9 +126,90 @@ async def todayfix(db:Session = Depends(get_db)):
         mid.pop('admin_id')
         mid.pop('fix_status')
         mid.pop('fix_endtime')
-        print(mid)
         mid['name'] = i[0]
         mid['addr'] = Util.addr(i[2])
         message.append(mid)
     return message
 
+class moneyalert(BaseModel):
+    charge_cost: str = None
+    charge_ddl: str = None
+    charge_id: str = None
+    charge_memo:str = None
+    cust_id:str = None
+    name:str = None
+
+@router.post("/moneyalert")
+async def moneyalert(request_data: moneyalert,db: Session = Depends(get_db)):
+    data = crudCommon.getlog(db,request_data.charge_id)
+    if data ==None:
+        id = request_data.charge_id
+        title = "缴费通知"
+        log = "您有一笔"+request_data.charge_cost+"元的"+request_data.charge_memo+"，请及时缴纳"
+        cust_id = request_data.cust_id
+        time =datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+        status = 0
+        crudCommon.addlog(db,id,title,log,cust_id,time,status)
+        return {"mess":"已通知"}
+    else:
+        return {"mess":"已通知完毕，请勿重复通知"}
+
+@router.get("/poster")
+async def poster(db:Session = Depends(get_db)):
+    data = crudCommon.get_poster(db)
+    message = []
+    for i in data:
+        mid = i[0].__dict__
+        time = datetime.datetime.now().replace(microsecond=0) - mid['poster_time']
+        time = time.days * 86400 + time.seconds
+        endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
+        endtime = endtime.days * 86400 + endtime.seconds
+        if time >= 0 and endtime < 0:
+            mid['time'] = mid['poster_time'].strftime('%Y-%m-%d %H:%M')
+            mid['endtime'] = mid['poster_endtime'].strftime('%Y-%m-%d %H:%M')
+            mid.pop('_sa_instance_state')
+            mid['admin_name'] = i[1]
+            mid.pop('admin_id')
+            mid.pop('poster_time')
+            mid.pop('poster_endtime')
+            message.append(mid)
+    return message
+
+@router.get("/postercount")
+async def poster(db:Session = Depends(get_db)):
+    data = crudCommon.get_postercount(db)
+    message = []
+    message.append(data)
+    return message
+
+@router.get("/unposter")
+async def poster(db:Session = Depends(get_db)):
+    data = crudCommon.get_poster(db)
+    message = []
+    jj=0
+    for i in data:
+        mid = i[0].__dict__
+        time = datetime.datetime.now().replace(microsecond=0) - mid['poster_time']
+        time = time.days * 86400 + time.seconds
+        endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
+        endtime = endtime.days * 86400 + endtime.seconds
+        if time <= 0 and endtime < 0:
+            mid['time'] = mid['poster_time'].strftime('%Y-%m-%d %H:%M')
+            mid['endtime'] = mid['poster_endtime'].strftime('%Y-%m-%d %H:%M')
+            mid.pop('_sa_instance_state')
+            mid['admin_name'] = i[1]
+            mid.pop('admin_id')
+            mid.pop('poster_time')
+            mid.pop('poster_endtime')
+            jj+=1
+            message.append(mid)
+    return message
+
+class post(BaseModel):
+    id: str = None
+
+@router.post("/post")
+async def post(request_data: post,db: Session = Depends(get_db)):
+    time = datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+    crudUser.change_Posterpost(db,request_data.id,time)
+    return {"mess":"已发布，请刷新页面查看"}

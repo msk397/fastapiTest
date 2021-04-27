@@ -80,5 +80,6 @@ class Poster(Base):
     poster_log = Column(String(5000), nullable=False)
     poster_time = Column(DateTime, nullable=False)
     admin_id = Column(ForeignKey('admin.admin_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, comment='????')
+    poster_endtime = Column(DateTime, nullable=False)
 
     admin = relationship('Admin')
