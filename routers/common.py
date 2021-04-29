@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -53,7 +53,7 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
             if data["cust_password"] == passwd:
                 message["flag"] = "success"
                 message["mess"] = "cust"
-                message["name"] = data["cust_realname"]
+                message["name"] = data["cust_name"]
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"

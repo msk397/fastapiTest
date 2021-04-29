@@ -113,3 +113,51 @@ def change_Posterpost(db, poster_id, time):
         'poster_time': time,
     })
     db.commit()
+
+
+def get_adminmess(db):
+    return db.query(models.Admin)\
+        .filter(models.Admin.admin_id!="null")\
+        .filter(models.Admin.admin_id != "root")\
+        .all()
+
+
+def del_adminone(db, login):
+    db.query(models.Admin).filter(models.Admin.admin_loginname == login).delete()
+    db.commit()
+
+
+def add_admin(db, id, addr,name, phone, loginname, param):
+    cust = models.Admin(admin_id=id, admin_loginname=loginname,
+                       admin_addr=addr, admin_realname=name,
+                       admin_phone=phone, admin_password=param)
+    db.add(cust)
+    db.commit()
+
+
+def change_Admin(db, addr, phone, login, name):
+    db.query(models.Admin).filter(models.Admin.admin_loginname == login).update({
+        'admin_addr': addr,
+        'admin_realname': name,
+        'admin_phone': phone,
+    })
+    db.commit()
+
+
+def resetAdminPass(db, id, md5Pass):
+    db.query(models.Admin).filter(models.Admin.admin_id == id).update({
+        'admin_password': md5Pass,
+    })
+    db.commit()
+
+
+def del_CustConfirm(db, id):
+    a = db.query(models.Fix) \
+        .filter(models.Fix.fix_status == 0)\
+        .filter(models.Fix.cust_id == id)\
+        .count()
+    b = db.query(models.Charge) \
+        .filter(models.Charge.charge_status == 0)\
+        .filter(models.Charge.cust_id == id)\
+        .count()
+    return a+b

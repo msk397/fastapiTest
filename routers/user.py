@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -6,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import Util
-from sql_app.crud import crudCommon, crudUser
+from sql_app.crud import crudCommon, crudUser, crudCust
 from sql_app.database import SessionLocal
 
 router = APIRouter(
@@ -49,6 +50,23 @@ async def queryusermess(request_data: QueryUser,db: Session = Depends(get_db)):
     message["passwd"] = data["admin_password"]
     return message
 
+@router.post("/querycustmess")
+async def querycustmess(request_data: QueryUser,db: Session = Depends(get_db)):
+    account = request_data.name
+    message = {"real": None, "addr": None, "phone": None,}
+    data = crudCommon.get_cust(db, account).__dict__
+    data.pop('_sa_instance_state')
+    data.pop('cust_password')
+    message["real"]=data["cust_name"]
+    message["addr"] = data["cust_addr"]
+    message["phone"] = data["cust_phone"]
+    addrlist = data['cust_addr'].split('-', 2)
+    message['cust_floor'] = addrlist[0]
+    message['cust_unit'] = addrlist[1]
+    message['cust_door'] = addrlist[2]
+    message['addr'] = message['cust_floor'] + '号楼' + message['cust_unit'] + '单元' + message['cust_door']
+    return message
+
 @router.post("/saveusermess")
 async def save_user_mess(request_data: User,db: Session = Depends(get_db)):
     login = request_data.login
@@ -57,6 +75,16 @@ async def save_user_mess(request_data: User,db: Session = Depends(get_db)):
     addr = request_data.addr
     message = {"mess": "修改成功"}
     crudCommon.save_admin(db, login, real, addr, phone)
+    return message
+
+@router.post("/savecustmess")
+async def save_user_mess(request_data: User,db: Session = Depends(get_db)):
+    login = request_data.login
+    real = request_data.real
+    phone = request_data.phone
+    addr = request_data.addr
+    message = {"mess": "修改成功"}
+    crudCommon.save_cust(db, login, real, phone)
     return message
 
 @router.post("/changeuserpass")
@@ -144,7 +172,7 @@ async def moneyalert(request_data: moneyalert,db: Session = Depends(get_db)):
     data = crudCommon.getlog(db,request_data.charge_id)
     if data ==None:
         id = request_data.charge_id
-        title = "缴费通知"
+        title = datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d')+" 缴费通知"
         log = "您有一笔"+request_data.charge_cost+"元的"+request_data.charge_memo+"，请及时缴纳"
         cust_id = request_data.cust_id
         time =datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
@@ -213,3 +241,88 @@ async def post(request_data: post,db: Session = Depends(get_db)):
     time = datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
     crudUser.change_Posterpost(db,request_data.id,time)
     return {"mess":"已发布，请刷新页面查看"}
+
+@router.get("/queryadmin")
+async def query_admin(db: Session = Depends(get_db)):
+    data = crudUser.get_adminmess(db)
+    message = []
+    for i in data:
+        mid = i.__dict__
+        mid.pop('_sa_instance_state')
+        mid.pop('admin_password')
+        message.append(mid)
+    return message
+
+@router.post("/DelAdmin")
+async def Del_admin(request_data: User,db: Session = Depends(get_db)):
+    crudUser.del_adminone(db, request_data.login)
+    return "删除员工成功"
+
+class Admin(BaseModel):
+    admin_id:str = None
+    admin_realname:str = None
+    admin_loginname: str= None
+    admin_addr:str = None
+    admin_phone:str = None
+
+@router.post("/AddAdmin")
+async def AddAdmin(data:Admin,db:Session = Depends(get_db)):
+    getdata = crudCommon.get_adminlogin(db, data.admin_loginname)
+    if getdata != None:
+        return "用户名重复请重新设置"
+    id = str(uuid.uuid4())
+    passwd = Util.setPass(id,data.admin_realname)
+    crudUser.add_admin(db, id,data.admin_addr,data.admin_realname,data.admin_phone,data.admin_loginname,passwd[1])
+    return "密码为："+passwd[0]
+
+@router.post("/changeAdminMess")
+async def changeCustMess(data:Admin,db: Session = Depends(get_db)):
+    crudUser.change_Admin(db, data.admin_addr,data.admin_phone,data.admin_loginname,data.admin_realname)
+    return "修改成功"
+
+@router.post("/resetPass")
+async def resetPass(request_data: Admin,db: Session = Depends(get_db)):
+    id = request_data.admin_id[0:5]
+    name = request_data.admin_realname
+    passwd =id+Util.FirstPinyin(name)
+    md5Pass = Util.MD5(passwd)
+    crudUser.resetAdminPass(db,request_data.admin_id,md5Pass)
+    return "已将密码重置为："+passwd
+
+class log(BaseModel):
+    admin_id: str = None
+    log_log:str = None
+    title:str = None
+    name: str = None
+
+@router.post("/addlog")
+async def addlog(data:log,db:Session = Depends(get_db)):
+    id = str(uuid.uuid4())
+    title = data.title
+    log =data.log_log
+    cust_id = data.admin_id
+    time = datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+    status = 0
+    crudCommon.addlog(db, id, title, log, cust_id, time, status)
+    return "已通知"
+
+
+@router.post("/querylog")
+async def querylog(request_data:log,db:Session = Depends(get_db)):
+    data = crudCommon.get_userid(db,request_data.name)
+    data = data[0]
+    data0 = crudCust.getlogfail(db, data)
+    data1 = crudCust.getlogsucc(db, data)
+    data = crudCust.getlog(db,data)
+    message=[]
+    mess=[]
+    for i in data:
+        mid = i.__dict__
+        mid.pop('_sa_instance_state')
+        mid.pop('cust_id')
+        mid['log_time'] = mid['log_time'].strftime('%Y-%m-%d %H:%M')
+        message.append(mid)
+    mess.append(message)
+    mess.append(data0)
+    mess.append(data1)
+    return mess

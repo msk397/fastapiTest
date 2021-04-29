@@ -13,6 +13,13 @@ def save_admin(db:Session,login:str,real:str,addr:str,phone:str):
     })
     db.commit()
 
+def save_cust(db, login, real, phone):
+    db.query(models.Cust).filter(models.Cust.cust_loginname == login).update({
+        'cust_name': real,
+        'cust_phone': phone,
+    })
+    db.commit()
+
 def change_user_pass(db, login, newPass):
     db.query(models.Admin).filter(models.Admin.admin_loginname == login).update({
         'admin_password': newPass,
@@ -34,6 +41,7 @@ def get_cust(db:Session,cust_loginname:str):
 
 def get_custid(db:Session,cust_name:str):
     return db.query(models.Cust.cust_id).filter(models.Cust.cust_name == cust_name).first()
+
 
 def get_custlogin(db, login):
     return db.query(models.Cust.cust_loginname).filter(models.Cust.cust_loginname == login).first()
@@ -97,3 +105,27 @@ def addlog(db, id, title, log, cust_id, time, status):
     db.commit()
 
 
+def get_custaddr(db, addr):
+    return db.query(models.Cust.cust_loginname).filter(models.Cust.cust_addr == addr).first()
+
+
+def get_custname(db, name):
+    return db.query(models.Cust.cust_loginname).filter(models.Cust.cust_name == name).first()
+
+
+def get_custaddrid(db, addr, id):
+    return db.query(models.Cust.cust_loginname)\
+        .filter(models.Cust.cust_addr == addr)\
+        .filter(models.Cust.cust_id != id).first()
+
+
+def get_custnameid(db, name, id):
+    return db.query(models.Cust.cust_loginname).filter(models.Cust.cust_name == name).filter(models.Cust.cust_id != id).first()
+
+
+def get_custPass(db, login):
+    return db.query(models.Cust.cust_password).filter(models.Cust.cust_loginname == login).first()
+
+
+def get_adminlogin(db, login):
+    return db.query(models.Admin.admin_loginname).filter(models.Admin.admin_loginname == login).first()

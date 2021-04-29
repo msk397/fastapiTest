@@ -61,8 +61,14 @@ class CustMess(BaseModel):
 @router.post("/changeCustMess")
 async def changeCustMess(data:CustMess,db: Session = Depends(get_db)):
     addr = data.cust_floor+'-'+data.cust_unit+'-'+data.cust_door
+    getdata = crudCommon.get_custnameid(db, data.cust_name,data.cust_id)
+    if getdata != None:
+        return "姓名重复，请重新设置"
+    getdata = crudCommon.get_custaddrid(db, addr,data.cust_id)
+    if getdata != None:
+        return "该地址已有业主，请重新设置"
     crudUser.change_Cust(db, data.cust_id, addr,data.cust_name,data.cust_phone)
-    return {"mess": "修改成功"}
+    return "修改成功"
 
 
 class AddCust(BaseModel):
@@ -76,14 +82,22 @@ class AddCust(BaseModel):
 
 @router.post("/AddCust")
 async def AddCust(data:AddCust,db:Session = Depends(get_db)):
-    getdata = crudCommon.get_custlogin(db,data.cust_loginname)
-    if getdata !=None:
+    addr = data.cust_floor + '-' + data.cust_unit + '-' + data.cust_door
+    getdata = crudCommon.get_custlogin(db, data.cust_loginname)
+    mess=""
+    if getdata != None:
         return "用户名重复请重新设置"
-    addr =  data.cust_floor+'-'+data.cust_unit+'-'+data.cust_door
+    getdata = crudCommon.get_custaddr(db, addr)
+    if getdata !=None:
+        return "该地址已有业主，请重新设置"
+    getdata = crudCommon.get_custname(db, data.cust_name)
+    if getdata != None:
+        mess = "有业主重名，已将该业主命名为"+data.cust_name+addr+","
+        data.cust_name = data.cust_name+addr
     id = str(uuid.uuid4())
     passwd = Util.setPass(id,data.cust_name)
     crudUser.add_Cust(db, id,addr,data.cust_name,data.cust_phone,data.cust_loginname,passwd[1])
-    return "密码为："+passwd[0]
+    return mess+"密码为："+passwd[0]
 
 
 class Delcust(BaseModel):
@@ -92,7 +106,12 @@ class Delcust(BaseModel):
 
 @router.post("/DelCust")
 async def Del_cust(request_data: Delcust,db: Session = Depends(get_db)):
-    crudUser.del_Custone(db, request_data.id)
+    data = crudUser.del_CustConfirm(db, request_data.id)
+    if data ==0:
+        crudUser.del_Custone(db, request_data.id)
+        return "删除成功"
+    return "该用户在缴费或维修项目有未完成的事项，请处理完毕再删除"
+
 
 
 

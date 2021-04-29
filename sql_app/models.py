@@ -30,11 +30,22 @@ class Cust(Base):
     cust_phone = Column(String(20), nullable=False)
 
 
+class Log(Base):
+    __tablename__ = 'log'
+
+    log_id = Column(String(50), primary_key=True)
+    log_title = Column(String(50), nullable=False)
+    log_log = Column(String(500), nullable=False)
+    cust_id = Column(String(40), nullable=False, index=True)
+    log_time = Column(DateTime, nullable=False)
+    log_status = Column(TINYINT(4), nullable=False)
+
+
 class Charge(Base):
     __tablename__ = 'charge'
 
     charge_id = Column(String(40), primary_key=True)
-    cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    cust_id = Column(ForeignKey('cust.cust_id', onupdate='CASCADE'), nullable=False, index=True)
     charge_status = Column(TINYINT(1), nullable=False, comment='????')
     charge_time = Column(Date)
     charge_cost = Column(Float(10, True), nullable=False)
@@ -59,19 +70,6 @@ class Fix(Base):
     cust = relationship('Cust')
 
 
-class Log(Base):
-    __tablename__ = 'log'
-
-    log_id = Column(String(50), primary_key=True)
-    log_title = Column(String(50), nullable=False)
-    log_log = Column(String(255), nullable=False)
-    cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    log_time = Column(DateTime, nullable=False)
-    log_status = Column(TINYINT(4), nullable=False)
-
-    cust = relationship('Cust')
-
-
 class Poster(Base):
     __tablename__ = 'poster'
 
@@ -79,7 +77,7 @@ class Poster(Base):
     poster_title = Column(String(255), nullable=False)
     poster_log = Column(String(5000), nullable=False)
     poster_time = Column(DateTime, nullable=False)
-    admin_id = Column(ForeignKey('admin.admin_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, comment='????')
+    admin_id = Column(ForeignKey('admin.admin_id', onupdate='CASCADE'), nullable=False, index=True, comment='????')
     poster_endtime = Column(DateTime, nullable=False)
 
     admin = relationship('Admin')
