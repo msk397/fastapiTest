@@ -192,7 +192,7 @@ async def poster(db:Session = Depends(get_db)):
         time = time.days * 86400 + time.seconds
         endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
         endtime = endtime.days * 86400 + endtime.seconds
-        if time >= 0 and endtime < 0:
+        if time >= 0 and endtime < 0 and mid['poster_status']!= None:
             mid['time'] = mid['poster_time'].strftime('%Y-%m-%d %H:%M')
             mid['endtime'] = mid['poster_endtime'].strftime('%Y-%m-%d %H:%M')
             mid.pop('_sa_instance_state')
@@ -221,7 +221,7 @@ async def poster(db:Session = Depends(get_db)):
         time = time.days * 86400 + time.seconds
         endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
         endtime = endtime.days * 86400 + endtime.seconds
-        if time <= 0 and endtime < 0:
+        if time <= 0 and endtime < 0 and mid['poster_status']!= None:
             mid['time'] = mid['poster_time'].strftime('%Y-%m-%d %H:%M')
             mid['endtime'] = mid['poster_endtime'].strftime('%Y-%m-%d %H:%M')
             mid.pop('_sa_instance_state')
@@ -239,8 +239,16 @@ class post(BaseModel):
 @router.post("/post")
 async def post(request_data: post,db: Session = Depends(get_db)):
     time = datetime.datetime.now().replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
-    crudUser.change_Posterpost(db,request_data.id,time)
-    return {"mess":"已发布，请刷新页面查看"}
+    crudUser.change_Posterpost(db, request_data.id, time)
+    return {"mess":"已发布"}
+
+class Post(BaseModel):
+    id: str = None
+@router.post("/postsign")
+async def postSign(request_data: Post, db: Session = Depends(get_db)):
+    print(request_data)
+    crudUser.change_Postersign(db,request_data.id)
+    return {"mess":"已签发"}
 
 @router.get("/queryadmin")
 async def query_admin(db: Session = Depends(get_db)):
@@ -326,3 +334,27 @@ async def querylog(request_data:log,db:Session = Depends(get_db)):
     mess.append(data0)
     mess.append(data1)
     return mess
+
+
+@router.get("/unsign")
+async def unsign(db:Session = Depends(get_db)):
+    data = crudCommon.get_poster(db)
+    message = []
+    jj=0
+    for i in data:
+        mid = i[0].__dict__
+        time = datetime.datetime.now().replace(microsecond=0) - mid['poster_time']
+        time = time.days * 86400 + time.seconds
+        endtime = datetime.datetime.now().replace(microsecond=0) - mid['poster_endtime']
+        endtime = endtime.days * 86400 + endtime.seconds
+        if endtime < 0 and mid['poster_status'] == None:
+            mid['time'] = mid['poster_time'].strftime('%Y-%m-%d %H:%M')
+            mid['endtime'] = mid['poster_endtime'].strftime('%Y-%m-%d %H:%M')
+            mid.pop('_sa_instance_state')
+            mid['admin_name'] = i[1]
+            mid.pop('admin_id')
+            mid.pop('poster_time')
+            mid.pop('poster_endtime')
+            jj+=1
+            message.append(mid)
+    return message

@@ -26,6 +26,7 @@ class Poster(BaseModel):
     poster_endtime: str = None
 
 class AddPoster(BaseModel):
+    admin_loginname: str = None
     poster_log: str = None
     poster_title: str = None
     admin_name: str = None
@@ -61,9 +62,15 @@ async def query_poster(db: Session = Depends(get_db)):
             if endtime>=0:
                 mid['status']="已过期"
             else:
-                mid['status'] = "已发布"
+                if mid['poster_status'] != None:
+                    mid['status'] = "已发布"
+                else:
+                    mid['status'] = "待签发"
         else:
-            mid['status'] = "未发布"
+            if mid['poster_status'] != None:
+                mid['status'] = "未发布"
+            else:
+                mid['status'] = "待签发"
         mid['poster_date'] = mid['poster_time'].strftime('%Y-%m-%d')
         mid['poster_time'] = mid['poster_time'].strftime('%H:%M')
         mid['poster_enddate'] = mid['poster_endtime'].strftime('%Y-%m-%d')
@@ -99,7 +106,7 @@ async def change_poster(request_data: Poster,db: Session = Depends(get_db)):
 @router.post("/AddPoster")
 async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     poster_log=request_data.poster_log
-    admin_name = request_data.admin_name
+    admin_loginname = request_data.admin_loginname
     poster_title=request_data.poster_title
     poster_date = request_data.poster_date
     poster_time = request_data.poster_time
@@ -110,11 +117,14 @@ async def Add_poster(request_data: AddPoster,db: Session = Depends(get_db)):
     poster_endtime = poster_enddate + ' ' + poster_endtime + ':00'
     poster_endtime = datetime.datetime.strptime(poster_endtime, '%Y-%m-%d %H:%M:%S')
     poster_id = str(uuid.uuid4())
-    admin_id = crudCommon.get_adminid(db, admin_name)
+    status = None
+    if admin_loginname == 'root':
+        status = 1
+    admin_id = crudCommon.get_userid(db, admin_loginname)
     time = poster_endtime-poster_time
     time = time.days * 86400 + time.seconds
     if time>0:
-        crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0],poster_endtime)
+        crudUser.add_Poster(db, poster_id, poster_log,poster_title,poster_time,admin_id[0],poster_endtime,status)
         return {"mess": "添加成功"}
     else:
         return {"mess": "截止时间需大于发布时间"}

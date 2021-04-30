@@ -41,10 +41,11 @@ def change_Poster(db, poster_id, poster_log, poster_title, poster_time,endtime):
     db.commit()
 
 
-def add_Poster(db, id, log, title, time,ad_id,endtime):
+def add_Poster(db, id, log, title, time,ad_id,endtime,status):
     poster = models.Poster(poster_id=id, poster_log = log,
                            poster_title = title,poster_time = time,
-                           admin_id = ad_id,poster_endtime = endtime)
+                           admin_id = ad_id,poster_endtime = endtime,
+                           poster_status = status)
     db.add(poster)
     db.commit()
 
@@ -161,3 +162,10 @@ def del_CustConfirm(db, id):
         .filter(models.Charge.cust_id == id)\
         .count()
     return a+b
+
+
+def change_Postersign(db, id):
+    db.query(models.Poster).filter(models.Poster.poster_id == id).update({
+        'poster_status': 1,
+    })
+    db.commit()
