@@ -49,6 +49,7 @@
 #             status_code=403, detail="You can only update the item: plumbus"
 #         )
 #     return {"item_id": item_id, "name": "The great Plumbus"}
+import random
 import uuid
 
 from fastapi import APIRouter, Depends
@@ -179,3 +180,22 @@ class Logid(BaseModel):
 @router.post("/readmail")
 async def readmail(request_data: Logid,db: Session = Depends(get_db)):
     crudCust.readmail(request_data.id,db)
+
+
+class paymoney(BaseModel):
+    charge_cost: str = None
+    charge_ddl: str = None
+    charge_id: str = None
+    charge_memo:str = None
+    cust_id:str = None
+    name:str = None
+
+@router.post("/paymoney")
+async def paymoney(request_data: paymoney,db: Session = Depends(get_db)):
+    id = request_data.charge_id
+    flag = random.randint(0,1)
+    if flag == 0:
+        crudCust.paymoney(db,id)
+        return "缴费成功"
+    else:
+        return "缴费失败"

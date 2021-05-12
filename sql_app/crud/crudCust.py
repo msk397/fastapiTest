@@ -57,3 +57,10 @@ def change_cust_pass(db, login, nP):
         'cust_password': nP,
     })
     db.commit()
+
+
+def paymoney(db, id):
+    db.query(models.Charge).filter(models.Charge.charge_id == id).update({
+        'charge_status': 1,
+    })
+    db.commit()

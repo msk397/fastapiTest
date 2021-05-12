@@ -1,8 +1,11 @@
+import base64
+
 from idna import unicode
-from xpinyin import Pinyin
+
 import hashlib
 # 获取首字母
 def FirstPinyin(str):
+    from xpinyin import Pinyin
     p = Pinyin()
     return p.get_initials(str, u'')
 
@@ -26,3 +29,6 @@ def addr(str):
     b= addrlist[1]
     c= addrlist[2]
     return a + '号楼' + b + '单元' + c
+
+
+

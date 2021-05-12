@@ -1,6 +1,8 @@
+
 import datetime
 import uuid
-
+import requests
+import json
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
@@ -16,6 +18,9 @@ router = APIRouter(
 
 class QueryUser(BaseModel):
     name: str = None
+
+class view(BaseModel):
+    base: str = None
 
 class User(BaseModel):
     login: str = None
@@ -108,6 +113,7 @@ async def change_user_pass(request_data: ChangePass,db: Session = Depends(get_db
 @router.get("/custnum")
 async def custnum(db:Session = Depends(get_db)):
     data = crudCommon.getCustNum(db)
+    print(type(data))
     return data
 
 @router.get("/todaymoney")
@@ -358,3 +364,13 @@ async def unsign(db:Session = Depends(get_db)):
             jj+=1
             message.append(mid)
     return message
+
+@router.post("/view")
+async  def view(request_data:view):
+    mess = request_data.base[23:]
+    data = {'images':[mess]}
+    headers = {"Content-type": "application/json"}
+    url = "http://1.15.184.95:8866/predict/chinese_ocr_db_crnn_mobile"
+    r = requests.post(url=url, headers=headers, data=json.dumps(data))
+    # 打印预测结果
+    return r.json()["results"][0]['data'][0]['text']
