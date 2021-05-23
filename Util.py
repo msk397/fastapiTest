@@ -17,7 +17,7 @@ def MD5(str):
 
 #生成密码
 def setPass(id,name):
-    id = id[0:5]
+    id = id[0:8]
     name = name
     passwd =id+FirstPinyin(name)
     return [passwd,MD5(passwd)]

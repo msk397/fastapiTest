@@ -22,13 +22,15 @@ def getfix(db, login):
 
 
 
-def addFix(db, cus_id, admi_id, id, time, status,log):
+def addFix(db, cus_id, admi_id, id, time, status,log,sort,fixer_id):
     cust = models.Fix(fix_id=id,
                       cust_id = cus_id,
                       admin_id = admi_id,
                       fix_startime = time,
                       fix_status = status,
                       fix_log = log,
+                      fix_sort = sort,
+                      fixer_id = fixer_id
                       )
     db.add(cust)
     db.commit()

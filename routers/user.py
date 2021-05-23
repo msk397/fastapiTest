@@ -113,7 +113,6 @@ async def change_user_pass(request_data: ChangePass,db: Session = Depends(get_db
 @router.get("/custnum")
 async def custnum(db:Session = Depends(get_db)):
     data = crudCommon.getCustNum(db)
-    print(type(data))
     return data
 
 @router.get("/todaymoney")
@@ -252,7 +251,6 @@ class Post(BaseModel):
     id: str = None
 @router.post("/postsign")
 async def postSign(request_data: Post, db: Session = Depends(get_db)):
-    print(request_data)
     crudUser.change_Postersign(db,request_data.id)
     return {"mess":"已签发"}
 
@@ -290,13 +288,13 @@ async def AddAdmin(data:Admin,db:Session = Depends(get_db)):
     return "密码为："+passwd[0]
 
 @router.post("/changeAdminMess")
-async def changeCustMess(data:Admin,db: Session = Depends(get_db)):
+async def changeAdminMess(data:Admin,db: Session = Depends(get_db)):
     crudUser.change_Admin(db, data.admin_addr,data.admin_phone,data.admin_loginname,data.admin_realname)
     return "修改成功"
 
 @router.post("/resetPass")
 async def resetPass(request_data: Admin,db: Session = Depends(get_db)):
-    id = request_data.admin_id[0:5]
+    id = request_data.admin_id[0:8]
     name = request_data.admin_realname
     passwd =id+Util.FirstPinyin(name)
     md5Pass = Util.MD5(passwd)
@@ -377,3 +375,19 @@ async  def view(request_data:view):
     if r.json()["results"][0]['data']:
         return {'mess':'识别成功','res':r.json()["results"][0]['data'][0]['text']}
     return {'mess':'识别失败','res':''}
+
+@router.get("/queryfixsort")
+async  def qfs(db:Session = Depends(get_db)):
+    data = crudUser.getfixsort(db)
+    message=[]
+    for i in data:
+        message.append({'x':i[0],'y':i[1]})
+    return message
+
+@router.get("/querymoneybymonth")
+async  def qmm(db:Session = Depends(get_db)):
+    data = crudUser.getmoneybymonth(db)
+    message=[]
+    for i in data:
+        message.append({'x':i[0],'y':i[1]})
+    return message

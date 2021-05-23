@@ -1,3 +1,4 @@
+from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
 from sql_app import models
 def get_charge(db:Session):
@@ -5,8 +6,7 @@ def get_charge(db:Session):
         .join( models.Cust, models.Charge.cust_id==models.Cust.cust_id ).all()
 
 def get_Cust(db:Session):
-    return db.query(models.Cust)\
-       .all()
+    return db.query(models.Cust).all()
 
 
 def change_Charge(db, charge_id, charge_memo, charge_ddl, charge_cost, charge_status):
@@ -55,9 +55,11 @@ def del_posterone(db, id):
     db.commit()
 
 def get_fix(db:Session):
-    return db.query(models.Fix,models.Cust.cust_name,models.Admin.admin_realname,models.Admin.admin_loginname,models.Cust.cust_addr)\
+    return db.query(models.Fix,models.Cust.cust_name,models.Admin.admin_realname,
+                    models.Admin.admin_loginname,models.Cust.cust_addr,models.Fixer.name)\
         .join( models.Cust, models.Fix.cust_id==models.Cust.cust_id ) \
         .join(models.Admin, models.Fix.admin_id == models.Admin.admin_id) \
+        .join(models.Fixer, models.Fix.fixer_id == models.Fixer.id) \
         .all()
 
 
@@ -66,10 +68,9 @@ def del_fixone(db, id):
     db.commit()
 
 
-def change_fix(db, id, end, start, log, admin_id, fix_status):
+def change_fix(db, id, end, start, log, admin_id):
     db.query(models.Fix).filter(models.Fix.fix_id == id).update({
         'fix_log':log,
-        'fix_status':fix_status,
         'fix_startime':start,
         'fix_endtime':end,
         'admin_id':admin_id,
@@ -169,3 +170,84 @@ def change_Postersign(db, id):
         'poster_status': 1,
     })
     db.commit()
+
+
+def get_fixer(db):
+    return db.query(models.Fixer) \
+        .filter(models.Fixer.id != "null") \
+        .all()
+
+
+def resetFixerPass(db, id, md5Pass):
+    db.query(models.Fixer).filter(models.Fixer.id == id).update({
+        'passwd': md5Pass,
+    })
+    db.commit()
+
+
+def del_Fixerone(db, login):
+    db.query(models.Fixer).filter(models.Fixer.login == login).delete()
+    db.commit()
+
+
+def change_Fixer(db, id, name, sort, phone):
+    db.query(models.Fixer).filter(models.Fixer.id == id).update({
+        'name': name,
+        'sort': sort,
+        'phone': phone,
+    })
+    db.commit()
+
+
+def add_fixer(db, id, name, phone, login, param, param1):
+    cust = models.Fixer(id=id, login=login,name=name,
+                        phone=phone, passwd=param,sort = param1)
+    db.add(cust)
+    db.commit()
+
+def get_fixerid(db, name):
+    return db.query(models.Fixer.id).filter(models.Fixer.name == name).first()
+
+
+def postfix(db, id, param, param1):
+    db.query(models.Fix).filter(models.Fix.fix_id == id).update({
+        'admin_id':param,
+        'fixer_id':param1,
+        'fix_status':0,
+    })
+    db.commit()
+
+
+def get_fixbyfixer(db, name):
+    return db.query(models.Fix, models.Cust.cust_name, models.Admin.admin_realname,
+                    models.Admin.admin_loginname, models.Cust.cust_addr, models.Fixer.name) \
+        .join(models.Cust, models.Fix.cust_id == models.Cust.cust_id) \
+        .join(models.Admin, models.Fix.admin_id == models.Admin.admin_id) \
+        .join(models.Fixer, models.Fix.fixer_id == models.Fixer.id) \
+        .filter(models.Fixer.name == name).all()
+
+
+def addfixtimeline(db, pid,id, title, log, pic,time):
+    cust = models.Fixlog(pid = pid,id=id,title = title,log = log,pic = pic,time = time)
+    db.add(cust)
+    db.commit()
+
+
+def get_fixlog(db, id):
+    return db.query(models.Fixlog).filter(models.Fixlog.id == id).order_by(models.Fixlog.time.desc()).all()
+
+
+def finalfix(db, id,time):
+    db.query(models.Fix).filter(models.Fix.fix_id == id).update({
+        'fix_status': 1,
+        'fix_endtime': time,
+    })
+    db.commit()
+
+
+def getfixsort(db):
+    return db.query(models.Fix.fix_sort, func.count(models.Fix.fix_sort)).group_by(models.Fix.fix_sort).all()
+
+
+def getmoneybymonth(db):
+    return db.query(extract('month', models.Charge.charge_time).label('month'), func.sum(models.Charge.charge_cost).label('sum')).group_by('month').all()

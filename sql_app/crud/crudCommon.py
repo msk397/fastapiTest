@@ -129,3 +129,19 @@ def get_custPass(db, login):
 
 def get_adminlogin(db, login):
     return db.query(models.Admin.admin_loginname).filter(models.Admin.admin_loginname == login).first()
+
+
+def get_Fixerlogin(db, login):
+    return db.query(models.Fixer.login).filter(models.Fixer.login == login).first()
+
+
+def get_fixer(db, account):
+    return db.query(models.Fixer).filter(models.Fixer.login == account).first()
+
+
+def save_fixer(db, login, name, phone):
+    db.query(models.Fixer).filter(models.Fixer.login == login).update({
+        'name': name,
+        'phone': phone,
+    })
+    db.commit()

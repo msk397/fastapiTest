@@ -39,7 +39,7 @@ class resetPass(BaseModel):
 
 @router.post("/resetPass")
 async def resetPass(request_data: resetPass,db: Session = Depends(get_db)):
-    id = request_data.id[0:5]
+    id = request_data.id[0:8]
     name = request_data.name
     passwd =id+Util.FirstPinyin(name)
     md5Pass = Util.MD5(passwd)

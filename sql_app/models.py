@@ -1,6 +1,6 @@
 # coding: utf-8
 from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, String
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy.dialects.mysql import LONGTEXT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -28,6 +28,17 @@ class Cust(Base):
     cust_name = Column(String(50), nullable=False)
     cust_addr = Column(String(50), nullable=False)
     cust_phone = Column(String(20), nullable=False)
+
+
+class Fixer(Base):
+    __tablename__ = 'fixer'
+
+    id = Column(String(255), primary_key=True)
+    sort = Column(String(255), nullable=False)
+    login = Column(String(255), nullable=False)
+    passwd = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
+    phone = Column(String(255), nullable=False)
 
 
 class Log(Base):
@@ -59,15 +70,18 @@ class Fix(Base):
     __tablename__ = 'fix'
 
     fix_id = Column(String(50), primary_key=True)
+    fix_sort = Column(String(255), nullable=False)
     fix_log = Column(String(500), nullable=False)
-    fix_status = Column(TINYINT(1), nullable=False)
+    fix_status = Column(TINYINT(1))
     fix_startime = Column(DateTime, nullable=False, comment='?????')
     cust_id = Column(ForeignKey('cust.cust_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     fix_endtime = Column(DateTime)
     admin_id = Column(ForeignKey('admin.admin_id', onupdate='CASCADE'), index=True)
+    fixer_id = Column(ForeignKey('fixer.id', onupdate='CASCADE'), index=True)
 
     admin = relationship('Admin')
     cust = relationship('Cust')
+    fixer = relationship('Fixer')
 
 
 class Poster(Base):
@@ -82,3 +96,16 @@ class Poster(Base):
     poster_status = Column(TINYINT(4))
 
     admin = relationship('Admin')
+
+
+class Fixlog(Base):
+    __tablename__ = 'fixlog'
+
+    id = Column(ForeignKey('fix.fix_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    log = Column(String(255), nullable=False)
+    time = Column(DateTime, nullable=False)
+    pic = Column(LONGTEXT)
+    title = Column(String(255), nullable=False)
+    pid = Column(String(255), primary_key=True)
+
+    fix = relationship('Fix')

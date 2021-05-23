@@ -31,17 +31,20 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
     message={"flag":False,"mess":None,"name":None}
     if choose == 'admin':
         data = crudCommon.get_admin(db, account)
-        flag = True
+        flag = 0
+    elif choose =='fixer':
+        data = crudCommon.get_fixer(db, account)
+        flag = 2
     else:
         data = crudCommon.get_cust(db,account)
-        flag = False
+        flag = 1
     if not bool(data):
         message["flag"]="error"
         message["mess"]="用户不存在"
     else:
         data = data.__dict__
         data.pop('_sa_instance_state')
-        if flag:
+        if flag==0:
             if data["admin_password"] == passwd:
                 message["flag"] = "success"
                 message["mess"] = "admin"
@@ -49,11 +52,19 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"
-        else:
+        elif flag==1:
             if data["cust_password"] == passwd:
                 message["flag"] = "success"
                 message["mess"] = "cust"
                 message["name"] = data["cust_name"]
+            else:
+                message["flag"] = "error"
+                message["mess"] = "密码错误"
+        elif flag==2:
+            if data["passwd"] == passwd:
+                message["flag"] = "success"
+                message["mess"] = "fixer"
+                message["name"] = data["name"]
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"

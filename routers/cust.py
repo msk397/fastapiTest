@@ -51,7 +51,7 @@
 #     return {"item_id": item_id, "name": "The great Plumbus"}
 import random
 import uuid
-
+import time
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
@@ -59,7 +59,7 @@ from sqlalchemy.orm import Session
 
 import Util
 from routers.user import ChangePass
-from sql_app.crud import crudCommon,crudCust
+from sql_app.crud import crudCommon, crudCust, crudUser
 from sql_app.database import SessionLocal
 
 router = APIRouter(
@@ -109,12 +109,18 @@ async def fix(data:loginname,db:Session = Depends(get_db)):
             mid['admin_name'] = i[1]
             mid['admin_login'] = i[2]
             mid['fix_endtime'] = str(mid['fix_endtime'])
-        if mid['fix_status'] == 0:
+        if mid['fix_status'] == None:
             mid['fix_status'] = "未处理"
             mid['status'] = False
-        else:
+            mid['fix_endtime'] = ''
+        elif mid['fix_status'] == 0:
+            mid['fix_status'] = "已指派"
+            mid['status'] = False
+            mid['fix_endtime'] = ''
+        elif mid['fix_status'] == 1:
             mid['fix_status'] = "已处理"
             mid['status'] = True
+            mid['fix_endtime'] = str(mid['fix_endtime'])
         mid['fix_startime'] = str(mid['fix_startime'])
         message.append(mid)
     return message
@@ -123,15 +129,22 @@ class Fix(BaseModel):
     login:str = None
     log:str = None
     time:str = None
+    fix_sort:str = None
 @router.post("/AddFix")
 async def AddFix(data:Fix,db:Session = Depends(get_db)):
     cust_id = crudCommon.get_custid(db,data.login)
     cust_id = cust_id[0]
     admin_id="null"
+    fixer_id='null'
     fix_id = str(uuid.uuid4())
-    time = data.time
-    status=0
-    crudCust.addFix(db,cust_id,admin_id,fix_id,time,status,data.log)
+    timeee = data.time
+    status=None
+    crudCust.addFix(db,cust_id,admin_id,fix_id,timeee,status,data.log,data.fix_sort,fixer_id)
+    pid = str(uuid.uuid4())
+    title = '业主提交了维修记录'
+    log=''
+    timee = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    crudUser.addfixtimeline(db, pid,fix_id, title, log, None, timee)
 
 class log(BaseModel):
     name:str = None

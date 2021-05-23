@@ -1,13 +1,14 @@
 #from fastapi import Depends, FastAPI
 from fastapi import FastAPI
 #from .dependencies import get_query_token, get_token_header
-from routers import cust, common, user, userCharge,userPoster,userFix,userCust
+from routers import cust, common, user, userCharge,userPoster,userFix,userCust,fixer
 from internal import admin
 from fastapi.middleware.cors import CORSMiddleware
 #app = FastAPI(dependencies=[Depends(get_query_token)])
 
 app = FastAPI()
 app.include_router(user.router)
+app.include_router(fixer.router)
 app.include_router(userCharge.router)
 app.include_router(userPoster.router)
 app.include_router(userFix.router)
