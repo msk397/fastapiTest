@@ -262,6 +262,10 @@ async def query_admin(db: Session = Depends(get_db)):
         mid = i.__dict__
         mid.pop('_sa_instance_state')
         mid.pop('admin_password')
+        if mid['admin_root']==0:
+            mid['status']=False
+        else:
+            mid['status'] = True
         message.append(mid)
     return message
 
@@ -276,6 +280,8 @@ class Admin(BaseModel):
     admin_loginname: str= None
     admin_addr:str = None
     admin_phone:str = None
+    admin_root:str = None
+    status:bool
 
 @router.post("/AddAdmin")
 async def AddAdmin(data:Admin,db:Session = Depends(get_db)):
@@ -284,12 +290,20 @@ async def AddAdmin(data:Admin,db:Session = Depends(get_db)):
         return "用户名重复请重新设置"
     id = str(uuid.uuid4())
     passwd = Util.setPass(id,data.admin_realname)
-    crudUser.add_admin(db, id,data.admin_addr,data.admin_realname,data.admin_phone,data.admin_loginname,passwd[1])
+    if data.status:
+        data.admin_root = 1
+    else:
+        data.admin_root = 0
+    crudUser.add_admin(db, id,data.admin_addr,data.admin_realname,data.admin_phone,data.admin_loginname,passwd[1],data.admin_root)
     return "密码为："+passwd[0]
 
 @router.post("/changeAdminMess")
 async def changeAdminMess(data:Admin,db: Session = Depends(get_db)):
-    crudUser.change_Admin(db, data.admin_addr,data.admin_phone,data.admin_loginname,data.admin_realname)
+    if data.status:
+        data.admin_root = 1
+    else:
+        data.admin_root = 0
+    crudUser.change_Admin(db, data.admin_addr,data.admin_phone,data.admin_loginname,data.admin_realname,data.admin_root)
     return "修改成功"
 
 @router.post("/resetPass")

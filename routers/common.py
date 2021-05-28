@@ -49,6 +49,7 @@ async def signin(request_data: Item,db: Session = Depends(get_db)):
                 message["flag"] = "success"
                 message["mess"] = "admin"
                 message["name"] = data["admin_realname"]
+                message['root'] = data['admin_root']
             else:
                 message["flag"] = "error"
                 message["mess"] = "密码错误"

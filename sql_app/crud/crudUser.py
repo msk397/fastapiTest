@@ -129,19 +129,20 @@ def del_adminone(db, login):
     db.commit()
 
 
-def add_admin(db, id, addr,name, phone, loginname, param):
+def add_admin(db, id, addr,name, phone, loginname, param,root):
     cust = models.Admin(admin_id=id, admin_loginname=loginname,
                        admin_addr=addr, admin_realname=name,
-                       admin_phone=phone, admin_password=param)
+                       admin_phone=phone, admin_password=param,admin_root =root)
     db.add(cust)
     db.commit()
 
 
-def change_Admin(db, addr, phone, login, name):
+def change_Admin(db, addr, phone, login, name,root):
     db.query(models.Admin).filter(models.Admin.admin_loginname == login).update({
         'admin_addr': addr,
         'admin_realname': name,
         'admin_phone': phone,
+        'admin_root': root,
     })
     db.commit()
 

@@ -91,14 +91,10 @@ async def Add_charge(request_data: AddCharge,db: Session = Depends(get_db)):
     charge_cost =request_data.charge_cost
     charge_ddl =request_data. charge_ddl
     charge_memo =request_data. charge_memo
-    status =request_data.status
     cust_name = request_data.cust_name
     charge_time = time.strftime("%Y-%m-%d", time.localtime())
     charge_id = str(uuid.uuid4())
-    if status:
-        charge_status = 1
-    else:
-        charge_status = 0
+    charge_status = 0
     cust_id = crudCommon.get_custid(db,cust_name)
     crudUser.add_Charge(db, charge_id,charge_memo,charge_ddl,charge_cost,charge_status,charge_time,cust_id[0])
     return {"mess": "添加成功"}

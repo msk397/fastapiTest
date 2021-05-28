@@ -174,3 +174,27 @@ async def querylog(request_data:Fixer,db:Session = Depends(get_db)):
     mess.append(data0)
     mess.append(data1)
     return mess
+
+class ChangePass(BaseModel):
+    login: str = None
+    newPass: str = None
+    oldPass:str = None
+    confirmPass:str = None
+
+@router.post("/changepass")
+async def change_user_pass(request_data: ChangePass,db: Session = Depends(get_db)):
+    login = request_data.login
+    nP = request_data.newPass
+    oP = request_data.oldPass
+    cP = request_data.confirmPass
+    data = crudCommon.get_fixerPass(db,login)
+    ooP = Util.MD5(oP)
+    if ooP != data[0]:
+        return {"mess": "旧密码错误，请重新输入"}
+    if oP == nP:
+        return {"mess": "新密码与旧密码一致，请重新输入"}
+    if nP != cP:
+        return {"mess": "新密码与确认密码不一致，请重新输入"}
+    nP =Util.MD5(nP)
+    crudCommon.change_fixer_pass(db, login, nP)
+    return {"mess": "修改成功"}

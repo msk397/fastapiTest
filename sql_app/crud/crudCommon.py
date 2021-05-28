@@ -145,3 +145,14 @@ def save_fixer(db, login, name, phone):
         'phone': phone,
     })
     db.commit()
+
+
+def get_fixerPass(db, login):
+    return db.query(models.Fixer.passwd).filter(models.Fixer.login == login).first()
+
+
+def change_fixer_pass(db, login, nP):
+    db.query(models.Fixer).filter(models.Fixer.login == login).update({
+        'passwd': nP,
+    })
+    db.commit()

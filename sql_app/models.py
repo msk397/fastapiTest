@@ -17,6 +17,7 @@ class Admin(Base):
     admin_password = Column(String(40), nullable=False)
     admin_phone = Column(String(20), nullable=False)
     admin_addr = Column(String(100))
+    admin_root = Column(TINYINT(4), nullable=False)
 
 
 class Cust(Base):
