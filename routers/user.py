@@ -383,7 +383,7 @@ async  def view(request_data:view):
     mess = request_data.base[cc:]
     data = {'images':[mess]}
     headers = {"Content-type": "application/json"}
-    url = "http://1.15.184.95:8866/predict/chinese_ocr_db_crnn_mobile"
+    url = "http://1.15.5:8866/predict/chinese_ocr_db_crnn_mobile"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     # 打印预测结果
     if r.json()["results"][0]['data']:
